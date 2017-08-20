@@ -1,10 +1,7 @@
 var Enocean = require("node-enocean")
 var EnoceanTelegram = require("../")
 var en = new Enocean()
-
 en.listen("/dev/ttyUSB0")
-//en.on("data",console.log)
-en.on("known-data",console.log)
 en.on("ready",function(){
   var id=(parseInt(en.base,16)+22).toString(16)
   var ti = EnoceanTelegram.teach_in(id,"a5-02-14")
@@ -23,5 +20,3 @@ en.on("ready",function(){
   },1000)
 })
 en.on("error",console.log)
-//55000a0701eba500007908ffa087163003ffffffffff00f3
-//55000a0701eba5ff037a080006be370001ffffffff49001c
