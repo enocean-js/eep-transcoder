@@ -26,5 +26,13 @@
   ],
   "a5-06-04":[
     {"TEMP":{"value":20,"diff":0.2},"ILL":{"value":54766,"diff":0.1},"SV":{"value":70,"diff":4},"TMPAV":{"value":1,"diff":0.1},"ENAV":{"value":1,"diff":0.1}}
+  ],
+  "f6-02-03":[
+    {"RA":{"value":112,"diff":0}},
+    {"RA":{"value":48,"diff":0}},
+    {"RA":{"value":0,"diff":0}}
+  ],
+  "f6-02-01":[
+    {"EB":{"value":0,"diff":0},"R1":{"value":2,"diff":0},"R2":{"value":3,"diff":0},"SA":{"value":1,"diff":0}}
   ]
 }

@@ -1,7 +1,5 @@
 "use strict";
 
-
-
 class BigInteger{
   constructor(l){
     this.length = l
@@ -63,50 +61,58 @@ class EnoceanTelegram {
     if(eep==undefined) return null
 
     if(!Array.isArray(eep.case))eep.case=[eep.case]
+
+    var tel = new EnoceanTelegram()
+    var copy = JSON.stringify(j.decoded)
+    tel.decoded=JSON.parse(copy)
+    tel.decoded.LRNB=j.decoded.LRNB || {value:1}
+    tel.encoded= new BigInteger(6+6+8+4).toString(16)
+    tel._sync=j._sync || 85
+    tel._type=j._type || 1
+    tel._optionalLength=j._optionalLength || 7
+    tel._packetType=j.packetType || 1
+    tel._data=j._data || 0
+    tel._senderId=j._senderId || "00112233"
+    tel._status=j._status || 48
+    tel._rssi=255
+    tel._securityLevel=0
+    tel._subTelNum=3
+    tel._destinationId=j._destinationId || "ffffffff"
+    tel._optionalData=tel._subTelNum.toString(16).padStart(2,"0")+tel._destinationId+tel._rssi.toString(16).padStart(2,"0")+tel._securityLevel.toString(16).padStart(2,"0")
+    if(parseInt(eep.rorg_number,16)==246){
+      //f6
+      tel._length=j.length || 7
+      tel._rorg=246
+    }
     if(parseInt(eep.rorg_number,16)==165){
       //a5
-      var tel = new EnoceanTelegram()
-      var copy = JSON.stringify(j.decoded)
-      tel.decoded=JSON.parse(copy)
-      tel.decoded.LRNB=j.decoded.LRNB || {value:1}
-      tel.encoded= new BigInteger(6+6+8+4).toString(16)
-      tel._sync=j._sync || 85
       tel._length=j.length || 10
-      tel._type=j._type || 1
-      tel._optionalLength=j._optionalLength || 7
-      tel._packetType=j.packetType || 1
-      tel._data=j._data || 0
-      tel._senderId=j._senderId || "00112233"
-      tel._status=j._status || 0
       tel._rorg=165
-      tel._rssi=255
-      tel._securityLevel=0
-      tel._subTelNum=3
-      tel._destinationId=j._destinationId || "ffffffff"
-      tel._optionalData=tel._subTelNum.toString(16).padStart(2,"0")+tel._destinationId+tel._rssi.toString(16).padStart(2,"0")+tel._securityLevel.toString(16).padStart(2,"0")
-      var tmp_data =new BigInteger(tel._length-6)
-      for(var item in j.decoded){
-        eep.case[0].datafield.forEach(function(e){
-          if(e.shortcut==item) {
-            var val = j.decoded[item].value
-            if(e.hasOwnProperty("range")){
-              //if(x.scale.hasOwnProperty("ref")) x.scale=x.range
-              var B=((e.scale.max*1-e.scale.min*1)/(e.range.max*1-e.range.min*1))
-              val   = Math.round(((val-e.scale.min*1)/B)+e.range.min*1)
-            }
-            tmp_data.setBits(e.bitoffs,e.bitsize,val)
-          }
-        })
-      }
-      var header = BigInteger.fromHex(paddedValue(tel._length,4)+paddedValue(tel._optionalLength,2)+paddedValue(tel._type,2))
-      var body=BigInteger.fromHex(tel._data+tel._optionalData)
-      tel._headerCRC=CRC8(header.toArray(10))
-      tel._bodyCRC=CRC8(body.toArray(10))
-      tel._userData=tmp_data.toString()
-      tel._data=tel._rorg.toString(16).padStart(2,"0")+tel._userData+tel._senderId+tel._status.toString(16).padStart(2,"0")
-      tel.encoded=paddedValue(tel._sync,2)+paddedValue(tel._length,4)+paddedValue(tel._optionalLength,2)+paddedValue(tel._type,2)+paddedValue(tel._headerCRC,2)+tel._data+tel._optionalData+paddedValue(tel._bodyCRC,2)
-      return tel
     }
+    var tmp_data =new BigInteger(tel._length-6)
+    for(var item in j.decoded){
+      if(!Array.isArray(eep.case[0].datafield))eep.case[0].datafield=[eep.case[0].datafield]
+      eep.case[0].datafield.forEach(function(e){
+        if(e.shortcut==item) {
+          var val = j.decoded[item].value
+
+          if(e.hasOwnProperty("range")){
+            //if(x.scale.hasOwnProperty("ref")) x.scale=x.range
+            var B=((e.scale.max*1-e.scale.min*1)/(e.range.max*1-e.range.min*1))
+            val   = Math.round(((val-e.scale.min*1)/B)+e.range.min*1)
+          }
+          tmp_data.setBits(e.bitoffs,e.bitsize,val)
+        }
+      })
+    }
+    var header = BigInteger.fromHex(paddedValue(tel._length,4)+paddedValue(tel._optionalLength,2)+paddedValue(tel._type,2))
+    var body=BigInteger.fromHex(tel._data+tel._optionalData)
+    tel._headerCRC=CRC8(header.toArray(10))
+    tel._bodyCRC=CRC8(body.toArray(10))
+    tel._userData=tmp_data.toString()
+    tel._data=tel._rorg.toString(16).padStart(2,"0")+tel._userData+tel._senderId+tel._status.toString(16).padStart(2,"0")
+    tel.encoded=paddedValue(tel._sync,2)+paddedValue(tel._length,4)+paddedValue(tel._optionalLength,2)+paddedValue(tel._type,2)+paddedValue(tel._headerCRC,2)+tel._data+tel._optionalData+paddedValue(tel._bodyCRC,2)
+    return tel
   }
   static decode(t,eepstr){
     var tel = new EnoceanTelegram()
@@ -136,7 +142,7 @@ class EnoceanTelegram {
         var s1=new BigInteger(1)
         s1.setSingleBit(item.condition.statusfield[0].bitoffs*1,item.condition.statusfield[0].value*1)
         s1.setSingleBit(item.condition.statusfield[1].bitoffs*1,item.condition.statusfield[1].value*1)
-        if(s1.toString()==status){
+        if(s1.toString(10)==tel._status){
           tel.decoded = EnoceanTelegram.decodeTel(td,item)
         }
       }else{
@@ -710,6 +716,10 @@ var eep_desc={
           "bitsize": "8",
           "enum": {
             "item": [
+              {
+                "value": "0x00",
+                "description": "released"
+              },
               {
                 "value": "0x30",
                 "description": "Button A0: <br/>Set the controller in automatic mode"
