@@ -34,5 +34,8 @@
   ],
   "f6-02-01":[
     {"EB":{"value":0,"diff":0},"R1":{"value":2,"diff":0},"R2":{"value":3,"diff":0},"SA":{"value":1,"diff":0}}
+  ],
+  "d5-00-01":[
+    {"CO":{"value":1,"diff":0}}
   ]
 }

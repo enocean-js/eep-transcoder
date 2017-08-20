@@ -84,6 +84,11 @@ class EnoceanTelegram {
       tel._length=j.length || 7
       tel._rorg=246
     }
+    if(parseInt(eep.rorg_number,16)==213){
+      //d5
+      tel._length=j.length || 7
+      tel._rorg=213
+    }
     if(parseInt(eep.rorg_number,16)==165){
       //a5
       tel._length=j.length || 10

@@ -1,7 +1,7 @@
 # eep-transcoder
 
 a module for encoding and decoding Enocean Equipment Profile (EEP) Telegrams.
-This is a work in progress. **For now only RORG a5 and f6 is supported**...
+This is a work in progress. **For now only RORG a5,d5 and f6 (no VLD) is supported**...
 
 **The API will most likely still change a lot**
 
