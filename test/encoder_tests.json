@@ -1,0 +1,30 @@
+{
+  "a5-02-01":[
+    {"TMP":{"value":-40,"diff":0.1}},
+    {"TMP":{"value":-31,"diff":0.1}}
+  ],
+  "a5-02-02":[
+    {"TMP":{"value":-30,"diff":0.1}},
+    {"TMP":{"value":0,"diff":0.1}}
+  ],
+  "a5-02-03":[
+    {"TMP":{"value":-20,"diff":0.1}},
+    {"TMP":{"value":2,"diff":0.1}}
+  ],
+  "a5-02-30":[
+    {"TMP":{"value":-20,"diff":0.1}},
+    {"TMP":{"value":50.5,"diff":0.1}},
+    {"TMP":{"value":62.3,"diff":0.1}}
+  ],
+  "a5-04-02":[
+    {"TMP":{"value":20,"diff":0.1},"HUM":{"value":50,"diff":0.1},"TSN":{"value":1,"diff":0.1}},
+    {"HUM":{"value":80,"diff":0.1},"TSN":{"value":0,"diff":0.1}}
+  ],
+  "a5-04-03":[
+    {"TMP":{"value":20,"diff":0.1},"HUM":{"value":40,"diff":0.1}},
+    {"TMP":{"value":10,"diff":0.1},"HUM":{"value":80,"diff":0.1}}
+  ],
+  "a5-06-04":[
+    {"TEMP":{"value":20,"diff":0.2},"ILL":{"value":54766,"diff":0.1},"SV":{"value":70,"diff":4},"TMPAV":{"value":1,"diff":0.1},"ENAV":{"value":1,"diff":0.1}}
+  ]
+}
