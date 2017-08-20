@@ -5,6 +5,7 @@ This is a work in progress. **For now only RORG a5,d5 and f6 (no VLD) is support
 
 **The API will most likely still change a lot**
 
+
 ## installing
 
     npm i -S eep-transcoder
@@ -37,6 +38,8 @@ the encode function expects two parameters. one json representation of the teleg
     console.log(enc.encoded)
 
 the telegram will be filled with usefull defaults. So you only need to provide the data you want to change. this will most probably be the senderId and the data part which for json is stored in the `decoded` field.
+
+find out what fields can be used for which telgram in the [documentation](http://node-enocean.com/)
 
 ### decoding
 
