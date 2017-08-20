@@ -38,7 +38,7 @@ the encode function expects two parameters. one json representation of the teleg
 
 the telegram will be filled with usefull defaults. So you only need to provide the data you want to change. this will most probably be the senderId and the data part which for json is stored in the `decoded` field.
 
-## decoding
+### decoding
 
     var tel = "55000a0701eba5ff0385080006be370001ffffffff4400c5"
     var dec = EnocenTelegram.decode(tel,"a5-02-03")
