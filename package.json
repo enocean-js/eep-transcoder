@@ -1,14 +1,14 @@
 {
   "name": "eep-transcoder",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "and Enocean Equipment Profile (EEP) encoder and decoder that can transform between binary and json representation.",
   "main": "index.js",
   "scripts": {
     "test": "mocha --recursive"
   },
-  "repository" :
-  { "type" : "git",
-    "url" : "https://github.com/node-enocean/eep-transcoder.git"
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/node-enocean/eep-transcoder.git"
   },
   "author": "Holger Will",
   "license": "ISC",
