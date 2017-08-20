@@ -43,3 +43,11 @@ the telegram will be filled with usefull defaults. So you only need to provide t
     var tel = "55000a0701eba5ff0385080006be370001ffffffff4400c5"
     var dec = EnoceanTelegram.decode(tel,"a5-02-03")
     console.log(dec.decoded)
+
+### teach in Telegrams
+
+you can also create teach in telegrams. to do so you need the eep you want to encod by and a senderId which should be derived from enocean.base
+
+    var id=(parseInt(en.base,16)+22).toString(16)
+    var ti = EnoceanTelegram.teach_in(id,"a5-02-14")
+    console.log(ti)
