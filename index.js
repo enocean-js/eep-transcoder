@@ -56,6 +56,26 @@ class BigInteger{
 }
 
 class EnoceanTelegram {
+  static teach_in(senderId,eep){
+    var eep_a=eep.split("-")
+    var func=parseInt(eep_a[1],16)
+    var type=parseInt(eep_a[2],16)
+    var manu = 0x7f
+    var userdata=new BigInteger(4)
+    userdata.setBits(0,6,func)
+    userdata.setBits(6,7,type)
+    userdata.setBits(13,10,manu)
+    userdata.setSingleBit(24,1)
+    userdata.setSingleBit(28,0)
+    var sync = 85
+    var ptype= 1
+    var length = 10
+    var olength = 7
+    var head=BigInteger.fromHex(paddedValue(length,4)+paddedValue(olength,2)+paddedValue(ptype,2))
+    var headerCRC=CRC8(head.toArray(10))
+    var body=BigInteger.fromHex("a5"+userdata+senderId+"0003ffffffffff00")
+    return "55"+head.toString()+paddedValue(headerCRC,2)+body.toString()+paddedValue(CRC8(body.toArray(10)),2)
+  }
   static encode(j,eepstr){
     var eep = eep_desc[eepstr]
     if(eep==undefined) return null
@@ -73,7 +93,7 @@ class EnoceanTelegram {
     tel._packetType=j.packetType || 1
     tel._data=j._data || 0
     tel._senderId=j._senderId || "00112233"
-    tel._status=j._status || 48
+
     tel._rssi=255
     tel._securityLevel=0
     tel._subTelNum=3
@@ -81,25 +101,28 @@ class EnoceanTelegram {
     tel._optionalData=tel._subTelNum.toString(16).padStart(2,"0")+tel._destinationId+tel._rssi.toString(16).padStart(2,"0")+tel._securityLevel.toString(16).padStart(2,"0")
     if(parseInt(eep.rorg_number,16)==246){
       //f6
+      tel._status=j._status || 48
       tel._length=j.length || 7
       tel._rorg=246
     }
     if(parseInt(eep.rorg_number,16)==213){
       //d5
+      tel._status=j._status || 0
       tel._length=j.length || 7
       tel._rorg=213
     }
     if(parseInt(eep.rorg_number,16)==165){
       //a5
+      tel._status=j._status || 0
       tel._length=j.length || 10
       tel._rorg=165
     }
     var tmp_data =new BigInteger(tel._length-6)
-    for(var item in j.decoded){
+    for(var item in tel.decoded){
       if(!Array.isArray(eep.case[0].datafield))eep.case[0].datafield=[eep.case[0].datafield]
       eep.case[0].datafield.forEach(function(e){
         if(e.shortcut==item) {
-          var val = j.decoded[item].value
+          var val = tel.decoded[item].value
 
           if(e.hasOwnProperty("range")){
             //if(x.scale.hasOwnProperty("ref")) x.scale=x.range
@@ -111,11 +134,12 @@ class EnoceanTelegram {
       })
     }
     var header = BigInteger.fromHex(paddedValue(tel._length,4)+paddedValue(tel._optionalLength,2)+paddedValue(tel._type,2))
-    var body=BigInteger.fromHex(tel._data+tel._optionalData)
     tel._headerCRC=CRC8(header.toArray(10))
-    tel._bodyCRC=CRC8(body.toArray(10))
+
     tel._userData=tmp_data.toString()
     tel._data=tel._rorg.toString(16).padStart(2,"0")+tel._userData+tel._senderId+tel._status.toString(16).padStart(2,"0")
+    var body=BigInteger.fromHex(tel._data+tel._optionalData)
+    tel._bodyCRC=CRC8(body.toArray(10))
     tel.encoded=paddedValue(tel._sync,2)+paddedValue(tel._length,4)+paddedValue(tel._optionalLength,2)+paddedValue(tel._type,2)+paddedValue(tel._headerCRC,2)+tel._data+tel._optionalData+paddedValue(tel._bodyCRC,2)
     return tel
   }
