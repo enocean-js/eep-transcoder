@@ -41,5 +41,5 @@ the telegram will be filled with usefull defaults. So you only need to provide t
 ### decoding
 
     var tel = "55000a0701eba5ff0385080006be370001ffffffff4400c5"
-    var dec = EnocenTelegram.decode(tel,"a5-02-03")
+    var dec = EnoceanTelegram.decode(tel,"a5-02-03")
     console.log(dec.decoded)
