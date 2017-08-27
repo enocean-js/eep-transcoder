@@ -1,6 +1,6 @@
 {
   "name": "eep-transcoder",
-  "version": "0.0.5",
+  "version": "0.0.6",
   "description": "and Enocean Equipment Profile (EEP) encoder and decoder that can transform between binary and json representation.",
   "main": "index.js",
   "scripts": {
