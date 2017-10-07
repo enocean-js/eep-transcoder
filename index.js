@@ -163,18 +163,29 @@ class EnoceanTelegram {
     tel._rssi=parseInt(tel._optionalData.substr(10,2),16)
     tel._securitLevel=parseInt(tel._optionalData.substr(12,2),16)
     var eep = eep_desc[eepstr]
+    if(eep.hasOwnProperty("ref")) eep = eep_desc[`${eep.ref.rorg}-${eep.ref.func}-${eep.ref.type}`.toLowerCase()]
     if(eep==undefined) return null
     if(!Array.isArray(eep.case))eep.case=[eep.case]
     var td = BigInteger.fromHex(tel._userData)
-    eep.case.forEach(function(item){
+
+    eep.case.some(function(item){
       if(item.condition!=undefined && item.condition.statusfield!=undefined){
         var s1=new BigInteger(1)
         s1.setSingleBit(item.condition.statusfield[0].bitoffs*1,item.condition.statusfield[0].value*1)
         s1.setSingleBit(item.condition.statusfield[1].bitoffs*1,item.condition.statusfield[1].value*1)
         if(s1.toString(10)==tel._status){
           tel.decoded = EnoceanTelegram.decodeTel(td,item)
+          return true
         }
       }else{
+        if(item.condition!=undefined && item.condition.datafield!=undefined){
+          var s1=BigInteger.fromHex(tel._userData)
+          var cond=s1.getValue(item.condition.datafield.bitoffs,item.condition.datafield.bitsize)
+          if(item.condition.datafield.value==cond) {
+            tel.decoded = EnoceanTelegram.decodeTel(td,item)
+            return true
+          }
+        }
         tel.decoded = EnoceanTelegram.decodeTel(td,item)
       }
     })
@@ -205,6 +216,9 @@ class EnoceanTelegram {
       }
       if(item.hasOwnProperty("range")){
         var rdist = item.range.max*1-item.range.min*1
+        if(!item.hasOwnProperty("scale")){
+          item.scale={min:item.range.min,max:item.range.max}
+        }
         var sdist = item.scale.max*1-item.scale.min*1
         var dx = (sdist/rdist)
         var val = (val-item.range.min*1)*dx+item.scale.min*1
@@ -21232,6 +21246,12 @@ var eep_desc={
       {
         "title": "CMD 0x1 - Actuator Set Output",
         "description": "This message is sent to an actuator. It controls switching / dimming of one or all channels of an actuator.\n\t\t\t<br/><br/>\n            <img>graphics/EEP_D2-01-xx_CMD_01.png</img>\n            <br/>\n   \t\t\tREMARK:<br/>\n            In case an Actuator Set Output message specifies a parameter that is not supported by the device being addresses, such device shall react as following:<br/>\n            - channel not supported by device -> ignore message<br/>\n            - dimming command to switching device -> no change of status<br/>\n            - dimming command with non supported speed -> dim with regular speed<br/>\n            <br/>\n            RECOMMENDATION:<br/>\n            Dimmers should take things like phase shifting into account to provide\n            dimming based on power consumption (results in brightness for lamps) rather than\n            interpreting percentage values as phase angle only.\n            <br/>\n            <br/>",
+        "condition": {
+          "datafield": {
+            "bitoffs": "4",
+            "bitsize": "4",
+            "value": "1"
+          }},
         "datafield": [
           {
             "reserved": {},
@@ -21354,6 +21374,12 @@ var eep_desc={
       {
         "title": "CMD 0x2 - Actuator Set Local",
         "description": "This message is sent to an actuator. It configures one or all channels of an actuator.\n                <br/>\n                <br/>Response Timing: None\n                <br/>\n                <br/>\n                RECOMMENDATION:\n                <br/>\n                In case the device implements an internal order for dim timers, this order\n                should be from “dim timer 1” (fast) to “dim timer 3” (slow).\n                The configured time shall always be interpreted for a full range (0 to 100%) dimming.\n                <br/>\n                <br/>\n                <img>graphics/EEP_D2-01-xx_CMD_02.png</img>\n                <br/>",
+        "condition": {
+          "datafield": {
+            "bitoffs": "4",
+            "bitsize": "4",
+            "value": "2"
+          }},
         "datafield": [
           {
             "data": "Taught-in devices",
@@ -21615,6 +21641,12 @@ var eep_desc={
       {
         "title": "CMD 0x3 - Actuator Status Query",
         "description": "This message is sent to an actuator. It requests the status of one or all channels of an actuator.\n                <br/>\n                <br/>\n                Response Timing:<br/>\n                An Actuator Status Response message shall be received within a maximum of 300ms from the time of transmission of this message.\n                In case no such response is received within this time frame the action shall be treated as completed without result.\n                <br/>\n                <img>graphics/EEP_D2-01-xx_CMD_03.png</img>\n                <br/>",
+        "condition": {
+          "datafield": {
+            "bitoffs": "4",
+            "bitsize": "4",
+            "value": "3"
+          }},
         "datafield": [
           {
             "reserved": {},
@@ -21670,6 +21702,12 @@ var eep_desc={
       {
         "title": "CMD 0x4 - Actuator Status Response",
         "description": "This message is sent by an actuator if one of the following events occurs:<br/>\n                          -\tStatus of one channel has been changed locally<br/>\n                          -\tMessage Actuator Status Query has been received<br/>\n                <br/>\n                Response Timing:<br/>\n                This message shall be sent within a maximum of 50ms from the time of reception of the Actuator Status Query message.<br/>\n                <br/>\n                <img>graphics/EEP_D2-01-xx_CMD_04.png</img>\n                <br/>\n                REMARK 1:<br/>\n                In case an Actuator Status Query message specifies a parameter that is not supported by the device being addresses, such device shall ignore the message and shall not answer using the Actuator Status Response message.<br/>\n                REMARK 2:<br/>\n                In case an Actuator Status Query message queries all output channels supported by a device being addresses, such device shall answer per each output channel by using an individual Actuator Measurement Response message.<br/>\n                <br/>",
+        "condition": {
+          "datafield": {
+            "bitoffs": "4",
+            "bitsize": "4",
+            "value": "4"
+          }},
         "datafield": [
           {
             "data": "Power Failure",
@@ -21858,6 +21896,12 @@ var eep_desc={
       {
         "title": "CMD 0x5 - Actuator Set Measurement",
         "description": "The command defines values at offset 32 and at offset 40 which\n              are the limits for the transmission periodicity of messages.\n              MIT must not be set to 0, MAT >= MIT.\n                <br/>\n                <br/>Response Timing: None\n                <br/>\n                <br/>\n                <img>graphics/EEP_D2-01-xx_CMD_05.png</img>",
+        "condition": {
+          "datafield": {
+            "bitoffs": "4",
+            "bitsize": "4",
+            "value": "5"
+          }},
         "datafield": [
           {
             "reserved": {},
@@ -22094,6 +22138,12 @@ var eep_desc={
       {
         "title": "CMD 0x6 - Actuator Measurement Query",
         "description": "This message is sent to an actuator. The actuator replies with an Actuator Measurement Response message.\n                <br/>\n                <br/>Response Timing:\n                <br/>An Actuator Message Response message shall be received within a maximum of 300ms from the time of transmission of this message.\nIn case no such response is received within this time frame the action shall be treated as completed without result.\n                <br/>\n                <img>graphics/EEP_D2-01-xx_CMD_06.png</img>",
+        "condition": {
+          "datafield": {
+            "bitoffs": "4",
+            "bitsize": "4",
+            "value": "6"
+          }},
         "datafield": [
           {
             "reserved": {},
@@ -22169,6 +22219,12 @@ var eep_desc={
       {
         "title": "CMD 0x7 - Actuator Measurement Response",
         "description": "This message is sent by an actuator if one of the following events occurs:<br/>\n              -\tMeasurement results trigger an automated transmission (see Actuator Set Measurement message)<br/>\n              -\tMessage Actuator Measurement Query has been received\n                <br/>\n                <br/>Response Timing:<br/>\n                This message shall be sent within a maximum of 50ms from the time of reception of the Actuator Measurement Query message.\n                <br/>\n                <img>graphics/EEP_D2-01-xx_CMD_07.png</img>\n                <br/>\n                REMARK 1:<br/>\n                In case an Actuator Measurement Query message specifies a parameter that is not supported by the device addressed, such device shall ignore the message and shall not answer using the Actuator Measurement Response message.\n                <br/>\n                REMARK 2:<br/>\n                In case an Actuator Measurement Query message queries all output channels supported by a device being addresses, such device shall answer per each output channel by using an individual Actuator Measurement Response message.\n                <br/>",
+        "condition": {
+          "datafield": {
+            "bitoffs": "4",
+            "bitsize": "4",
+            "value": "7"
+          }},
         "datafield": [
           {
             "reserved": {},
@@ -22269,6 +22325,12 @@ var eep_desc={
       {
         "title": "CMD 0x8 - Actuator Set Pilot Wire Mode",
         "description": "<img>graphics/EEP_D2-01-xx_CMD_08.png</img>\n                <br/>",
+        "condition": {
+          "datafield": {
+            "bitoffs": "4",
+            "bitsize": "4",
+            "value": "8"
+          }},
         "datafield": [
           {
             "reserved": {},
@@ -22335,6 +22397,12 @@ var eep_desc={
       {
         "title": "CMD 0x9 - Actuator Pilot Wire Mode Query",
         "description": "<img>graphics/EEP_D2-01-xx_CMD_09.png</img>\n                <br/>",
+        "condition": {
+          "datafield": {
+            "bitoffs": "4",
+            "bitsize": "4",
+            "value": "9"
+          }},
         "datafield": [
           {
             "reserved": {},
@@ -22360,6 +22428,12 @@ var eep_desc={
       {
         "title": "CMD 0xA - Actuator Pilot Wire Mode Response",
         "description": "<img>graphics/EEP_D2-01-xx_CMD_0A.png</img>\n                <br/>",
+        "condition": {
+          "datafield": {
+            "bitoffs": "4",
+            "bitsize": "4",
+            "value": "10"
+          }},
         "datafield": [
           {
             "reserved": {},
@@ -22426,6 +22500,12 @@ var eep_desc={
       {
         "title": "CMD 0xB - Actuator Set External Interface Settings",
         "description": "<img>graphics/EEP_D2-01-xx_CMD_0B.png</img>\n                <br/>",
+        "condition": {
+          "datafield": {
+            "bitoffs": "4",
+            "bitsize": "4",
+            "value": "11"
+          }},
         "datafield": [
           {
             "reserved": {},
@@ -22592,6 +22672,12 @@ var eep_desc={
       {
         "title": "CMD 0xC - Actuator External Interface Settings Query",
         "description": "<img>graphics/EEP_D2-01-xx_CMD_0C.png</img>\n                <br/>",
+        "condition": {
+          "datafield": {
+            "bitoffs": "4",
+            "bitsize": "4",
+            "value": "12"
+          }},
         "datafield": [
           {
             "reserved": {},
@@ -22647,6 +22733,12 @@ var eep_desc={
       {
         "title": "CMD 0xD - Actuator External Interface Settings Response",
         "description": "<img>graphics/EEP_D2-01-xx_CMD_0D.png</img>\n                <br/>",
+        "condition": {
+          "datafield": {
+            "bitoffs": "4",
+            "bitsize": "4",
+            "value": "13"
+          }},
         "datafield": [
           {
             "reserved": {},
